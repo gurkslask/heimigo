@@ -28,10 +28,14 @@ func (T TT) GetFloat() float64 {
 
 func ConnectMQTT(tt chan TT) {
 	server := "tcp://192.168.20.157:1883"
-	topic := "/mosquitto/data"
-	topic2 := "/mosquitto/SUN_GT3"
-	topic3 := "/mosquitto/SUN_GT2"
 	clientid := "freja" + strconv.Itoa(time.Now().Second())
+	var topics []string = []string{
+		"/mosquitto/data",
+		"/mosquitto/SUN_GT1",
+		"/mosquitto/SUN_GT2",
+		"/mosquitto/SUN_GT3",
+		"esp/bme680/temperature",
+	}
 
 	connOpts := MQTT.NewClientOptions().AddBroker(server).SetClientID(clientid).SetCleanSession(true)
 
@@ -48,9 +52,9 @@ func ConnectMQTT(tt chan TT) {
 	}
 
 	connOpts.OnConnect = func(c MQTT.Client) {
-		subscribe(c, topic)
-		subscribe(c, topic2)
-		subscribe(c, topic3)
+		for _, v := range topics {
+			subscribe(c, v)
+		}
 	}
 
 	client := MQTT.NewClient(connOpts)

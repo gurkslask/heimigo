@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	// "heimigo/server/modbus"
+	"heimigo/server/modbus"
 	"heimigo/server/mqtt"
+	"heimigo/server/weatherAPI"
 	"time"
 )
 
@@ -21,8 +22,16 @@ func main() {
 			fmt.Printf("\n------\n%s\n-----\n", mqtt_test.Value)
 			values[mqtt_test.Topic] = mqtt_test
 		}()
-		// modbus.ModbusConn(4)
 		// weatherAPI.ReadWeather()
+		w := weatherAPI.ReadWeather()
+		var SUN_GT1 float64 // Givare i pannrum
+		var SUN_GT2 float64 // Givare på taket
+		var SUN_Hysteres float64 = 3.0
+		if SUN_GT2 > SUN_GT1+SUN_Hysteres && w.CheckSunIsUp() {
+			modbus.ModbusConn(4)
+		} else {
+			modbus.ModbusConn(0)
+		}
 		for _, val := range values {
 			fmt.Println(val.Print())
 

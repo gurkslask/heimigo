@@ -6,6 +6,7 @@ import (
 	"heimigo/server/helpers"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type WeatherData struct {
@@ -35,11 +36,21 @@ func (w *WeatherData) getActualWeather() {
 	w.ActualWeather = w.Weather[0]["main"].(string)
 }
 
-func ReadWeather() {
+func (w WeatherData) CheckSunIsUp() bool {
+	t := time.Now().Unix()
+	if t > int64(w.Sys.Sunrise) && t < int64(w.Sys.Sunset) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func ReadWeather() WeatherData {
 	var API_key string = "79793771a515cf5b843ba5652129affa"
 	var BASE_WEATHER_API_URL string = "http://api.openweathermap.org/data/2.5/weather"
 	var url = buildQuery("Kalmar", API_key, BASE_WEATHER_API_URL)
-	getWeather(url)
+	w := getWeather(url)
+	return w
 }
 func buildQuery(city string, api string, url string) string {
 	return fmt.Sprintf("%s?q=%s&units=%s&appid=%s", url, city, "metric", api)
